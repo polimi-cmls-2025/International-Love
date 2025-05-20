@@ -8,7 +8,7 @@ MIDIIn.connectAll;
 MIDIFunc.trace(true);
 
 SerialPort.devices;
-~port = SerialPort.new("/dev/tty.usbmodem14201", 9600);
+~port = SerialPort.new("/dev/tty.usbmodem14101", 9600);
 ~port.close;
 
 ~voices = Array.newClear(128); // For 128 MIDI notes
@@ -67,29 +67,35 @@ SynthDef(\multiOsc, { |freq = 220,
     lfoFreq = 1,
     master = 1, pan = 0, gate = 1| // <---
 
-    var env, mod, osc1, osc2, osc3, osc4, mix, lfo;
+    var env, mod, osc1, osc2, osc3, osc4, mix, lfo, fmMod;
 
     // Envelope ADSR
     env = EnvGen.kr(
-        Env.adsr(atk, dec, sus, rel),
+        Env.adsr(atk, dec, sus, rel, curve: -8.0),
         gate: gate, // <---
         doneAction: 2
     );
 
-    mod = SinOsc.ar(fmRate) * (freq * 0.05);
+    fmMod = Select.kr(fmRate > 0.31, [
+		0, //
+		SinOsc.ar(fmRate) * (freq * 0.05)
+	]);
 
-    osc1 = SinOsc.ar(freq + mod) * (vol1 / 900)*3;
-    osc2 = Pulse.ar(freq + mod) * (vol2 / 900);
-    osc3 = LFTri.ar(freq + mod) * (vol3 / 900);
-    osc4 = Saw.ar(freq + mod) * (vol4 / 900);
+    osc1 = SinOsc.ar(freq + fmMod) * (vol1 / 900);
+    osc2 = Pulse.ar(freq + fmMod) * (vol2 / 900);
+    osc3 = LFTri.ar(freq + fmMod) * (vol3 / 900);
+    osc4 = Saw.ar(freq + fmMod) * (vol4 / 900);
 
     mix = osc1 + osc2 + osc3 + osc4;
 
-    lfo = SinOsc.kr(lfoFreq).range(0, 1);
+    lfo = Select.kr(lfoFreq > 1.1, [
+		1, //
+		SinOsc.kr(lfoFreq).range(0.4, 1);
+	]);
 
     mix = mix * lfo;
 
-    mix = mix * env * (master / 900);
+    mix = mix * env * (master / 900)/3;
 
     Out.ar(0, Pan2.ar(mix, (pan / 900 * 2) - 1));
 }).add;
@@ -111,7 +117,7 @@ MIDIFunc.noteOn({ |velocity, noteNum, channel, srcID|
             \vol2, if(~volumes.isNil, {0}, {~volumes[1]}),
             \vol3, if(~volumes.isNil, {0}, {~volumes[2]}),
             \vol4, if(~volumes.isNil, {0}, {~volumes[3]}),
-            \atk, if(~adsr.isNil, {0.01}, {~adsr[0] / 900 * 2}),
+			\atk, if(~adsr.isNil, {0.01}, {(~adsr[0] / 900).linexp(0, 1, 0.01, 50)}),
             \dec, if(~adsr.isNil, {0.3}, {~adsr[1] / 900 * 2}),
             \sus, if(~adsr.isNil, {0.5}, {~adsr[2] / 900}),
             \rel, if(~adsr.isNil, {1.0}, {~adsr[3] / 900 * 2}),
@@ -143,7 +149,7 @@ MIDIFunc.noteOff({ |velocity, noteNum, channel, srcID|
 )
 
 
-// Used only without midi
+// Used only without midi, to initiate it:
 (
 Synth(\multiOsc, [
     \freq, 440, //Fixed freq to test
