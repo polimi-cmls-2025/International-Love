@@ -16,14 +16,20 @@ PFont font, smallFont;
 color bgColor = color(255);  
 color gridColor = color(200); 
 int lastReset = 0;
+boolean waitingForTrigger = false;
+int triggerPosition = -1;
+float triggerThreshold = 0.1f;  // Adjust as needed
+float lastTriggerTime = 0;
+int triggerTimeout = 100;       // Milliseconds to wait before forcing an update
+boolean triggerFound = false;
 
 void setup() {
   size(800, 600, P2D);
   
   // OSC configuration
   try {
-    oscP5 = new OscP5(this, 9001);
-    myRemoteLocation = new NetAddress("127.0.0.1", 9001);
+    oscP5 = new OscP5(this, 9004);
+    myRemoteLocation = new NetAddress("127.0.0.1", 9004);
   } catch (Exception e) {
     println("OSC init error: " + e);
   }
@@ -86,9 +92,41 @@ void oscEvent(OscMessage msg) {
       
       newWaveReceived = true;
       
-      // Capture wave for oscilloscope mode when switching or on significant change
+      // Handle oscilloscope mode - continuously update with trigger alignment
       if (displayMode == 1) {
-        arrayCopy(waveform, capturedWave);
+        // Look for a trigger point (rising edge crossing threshold)
+        triggerFound = false;
+        for (int i = 1; i < waveform.length - 1; i++) {
+          if (waveform[i-1] < triggerThreshold && waveform[i] >= triggerThreshold) {
+            // Found a trigger point
+            
+            // Only update if we have enough samples after the trigger point
+            if (i + 200 < waveform.length) {  // Make sure we have at least 200 samples after trigger
+              triggerFound = true;
+              
+              // Copy the wave starting from the trigger point
+              for (int j = 0; j < capturedWave.length; j++) {
+                int idx = i + j;
+                if (idx < waveform.length) {
+                  capturedWave[j] = waveform[idx];
+                } else {
+                  capturedWave[j] = 0;  // Pad with zeros if we run out of samples
+                }
+              }
+              
+              lastTriggerTime = millis();
+              break;
+            }
+          }
+        }
+        
+        // If no trigger found, but it's been too long since the last update,
+        // force an update to show changes in the signal
+        if (!triggerFound && millis() - lastTriggerTime > triggerTimeout) {
+          // Just capture the current waveform without trigger alignment
+          arrayCopy(waveform, capturedWave);
+          lastTriggerTime = millis();
+        }
       }
     }
   } catch (Exception e) {
@@ -114,7 +152,17 @@ void drawUI() {
   
   // Instructions
   fill(100);
-  text("1: Waveform | 2: Oscilloscope | SPACE: Freeze frame | R: Reset", width/2, height - 30);
+  String instructions = "1: Waveform | 2: Oscilloscope | SPACE: Capture now | R: Reset";
+  if (displayMode == 1) {
+    instructions += " | U/D: Adjust trigger (" + nf(triggerThreshold, 1, 2) + ")";
+  }
+  text(instructions, width/2, height - 30);
+  
+  // Show trigger level if in oscilloscope mode
+  if (displayMode == 1) {
+    fill(255, 0, 0);
+    text("Trigger: " + nf(triggerThreshold, 1, 2), 120, 100);
+  }
 }
 
 void drawWaveform() {
@@ -178,10 +226,15 @@ void drawOscilloscope() {
   stroke(0, 150);
   line(x, y + h/2, x+w, y + h/2);
   
-  // Show captured frame indicator
-  fill(0, 120, 255);
+  // Show trigger line
+  stroke(255, 0, 0, 100);
+  float triggerY = y + h/2 - triggerThreshold * h/2 * 0.8;
+  line(x, triggerY, x+w, triggerY);
+  
+  // Show status indicator
+  fill(triggerFound ? color(0, 150, 0) : color(200, 0, 0));
   textAlign(RIGHT, TOP);
-  text("Captured Frame", x + w - 10, y + 10);
+  text(triggerFound ? "Triggered" : "Auto", x + w - 10, y + 10);
 }
 
 void drawSimpleGrid(float x, float y, float w, float h) {
@@ -243,7 +296,7 @@ void drawNoSignal() {
   fill(200, 0, 0);
   textAlign(CENTER);
   text("NO SIGNAL DETECTED", width/2, height/2);
-  text("Check JUCE connection on port 9001", width/2, height/2 + 30);
+  text("Check JUCE connection on port 9004", width/2, height/2 + 30); // Update port number
 }
 
 void resetWaveforms() {
@@ -265,13 +318,19 @@ void keyPressed() {
   if (key == '1') {
     displayMode = 0; 
   } else if (key == '2') {
-    displayMode = 1; 
-    arrayCopy(waveform, capturedWave); // Capture current waveform
+    displayMode = 1;
   } else if (key == ' ') {
     if (displayMode == 1) {
-      arrayCopy(waveform, capturedWave); // Freeze current frame in oscilloscope mode
+      // In oscilloscope mode, space captures current waveform without waiting for trigger
+      arrayCopy(waveform, capturedWave);
     }
   } else if (key == 'r') {
     resetWaveforms();
+  } else if (key == 'u' && displayMode == 1) {
+    // Increase trigger threshold
+    triggerThreshold = min(triggerThreshold + 0.05f, 0.95f);
+  } else if (key == 'd' && displayMode == 1) {
+    // Decrease trigger threshold
+    triggerThreshold = max(triggerThreshold - 0.05f, -0.95f);
   }
 }
