@@ -17,7 +17,7 @@ MIDIFunc.trace(true);
 
 // Definition of the osc messages
 (
-// PLUGIN DE FILTRO (puerto 9001)
+// PLUGIN FOR FILTERING (port 9001)
 ~filterOSC = NetAddr("127.0.0.1", 9001);
 
 ~setFilter = {|name, active=1|
@@ -30,7 +30,7 @@ MIDIFunc.trace(true);
     //("Filter " ++ name ++ " cutoff: " ++ freq).postln;
 };
 
-// PLUGIN DE REVERB (puerto 9002)
+// PLUGIN FOR REVERB (port 9002)
 ~reverbOSC = NetAddr("127.0.0.1", 9002);
 
 ~setWet = {|val|
@@ -39,7 +39,7 @@ MIDIFunc.trace(true);
     //("Sent reverb wet value: " ++ val).postln;
 };
 
-// PLUGIN DE DISTORSIÓN (puerto 9003)
+// PLUGIN OF DISTORSION (port 9003)
 ~distortionOSC = NetAddr("127.0.0.1", 9003);
 
 ~setDrive = {|val|
@@ -48,10 +48,9 @@ MIDIFunc.trace(true);
     //("Sent distortion drive value: " ++ val).postln;
 };
 
-//"Todos los controladores OSC inicializados".postln;
 )
 
-
+//-------------INITIALIZE THE SERIAL RECEIVER AND OSC SENDER-------------------------------
 (
 ~buffer = "";
 ~reading = false;
@@ -82,7 +81,7 @@ MIDIFunc.trace(true);
                          "MASTER:", ~masterVol,
                          "PAN:", ~pan].postln;*/
 
-						 // PROCESAMIENTO DE FILTROS
+						 // FILTER OSC MESSAGE
                         var filterNames = ["LPF", "HPF", "BPF", "NOTCH"];
 
                         4.do{|i|
@@ -90,14 +89,12 @@ MIDIFunc.trace(true);
                             var name = filterNames[i];
                             var active = if(val > 0, 1, 0);
 
-                            // Enviar siempre el estado de activación (0 o 1)
                             ~setFilter.value(name, active);
 
-                            // Si está activo, enviar la frecuencia de corte
                             if(active == 1) {
                                 var freq;
 
-                                // Mapeo logarítmico para cada filtro
+                                // Mapping frequency
                                 switch(i,
                                     0, { // LPF: 300Hz - 10kHz
                                         freq = 300 * (10000/300).pow(val/900);
@@ -113,20 +110,19 @@ MIDIFunc.trace(true);
                                     }
                                 );
 
-                                // Enviar la frecuencia de corte
                                 ~setCutoff.value(name, freq);
                             };
                         };
 
-                        // PROCESAMIENTO DE REVERB (~fx[2])
+                        //REVERB OSC MESSAGE
                         if(~fx[2].notNil) {
-                            var wet = ~fx[2] / 900.0; // Mapeo 0-900 a 0-1
+                            var wet = ~fx[2] / 900.0;
                             ~setWet.value(wet);
                         };
 
-                        // PROCESAMIENTO DE DISTORSIÓN (~fx[3])
+                        // DISTORSION OSC MESSAGE
                         if(~fx[3].notNil) {
-                            var drive = ~fx[3] / 900.0; // Mapeo 0-900 a 0-1
+                            var drive = ~fx[3] / 900.0;
                             ~setDrive.value(drive);
                         };
 
@@ -233,36 +229,3 @@ SynthDef(\multiOsc, { |freq = 220,
     Out.ar(0, Pan2.ar(mix, (pan / 900 * 2) - 1));
 }).add;
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
