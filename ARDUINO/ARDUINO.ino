@@ -1,5 +1,8 @@
+//ñ
 int Ts=10;
- 
+
+//Defining the different pins 
+
 int potPins5V[] = {6,8,10,12};
 int potPins0V[] = {7,9,11,13};
 int potAnPins[]={A0,A1,A2};
@@ -15,19 +18,22 @@ int calLed=2; //Dig Pin to calibrate red and white
 int redV=0;
 int whiteV=0;
 
+//Arrays to store the measured values
+
 int pots[12]={};
 int leds[6]={};
 
+//We set up the serial port
 void setup() {
   Serial.begin(9600); 
-  pinMode(4,OUTPUT);
-  digitalWrite(4,HIGH);
-
 }
 
+
 void loop() {
+  //Functions to read the potentiometers and the leds.
   measurePot();
   measureLeds();
+  //Preparing the message to be sent by the serial en received on SUPERCOLLIDER
   Serial.print("<");
   int waves[4]={0,0,0,0};
   if(leds[3]!=0){
@@ -90,24 +96,21 @@ void loop() {
   Serial.println(">");
 }
 
+//This function iterates between the different digital lines and measures all the potentiometer sequentially
+//It stores the values in pots
 void measurePot(){
   for (int i=0;i<digPot;i++){
     PotLine(potPins5V[i]);
     for(int j=0;j<anPot;j++){
-      /*Serial.print(" Pot");
-      Serial.print(i*anPot+j);
-      Serial.print(": ");
-      Serial.print(analogRead(potAnPins[j]));*/
       pots[i*anPot+j]=1000-analogRead(potAnPins[j]);
     }
     delay(Ts);
-    //Serial.println();
   }
-  //Serial.println();
   PotLine(0); 
 
 }
 
+//This function changes the selected line to read mode, and put the other ones to high impedance to avoid interference
 void PotLine(int digitalLine){
   for(int i=0;i<digPot;i++){
     if(potPins5V[i]==digitalLine){
@@ -123,14 +126,13 @@ void PotLine(int digitalLine){
   } 
 }
 
+//This function iterates between the different digital lines and measures all the leds sequentially
+//It stores the values in leds
 void measureLeds(){
   calibrateLed();
   for (int i=0;i<digLed;i++){
     LedLine(ledPins[i]);
     for(int j=0;j<anLed;j++){
-      /*Serial.print(" Led");
-      Serial.print(i*anLed+j);
-      Serial.print(": ");*/
       
       leds[i*anLed+j]=colorLed(ledAnPins[j]);
     }
@@ -142,6 +144,7 @@ void measureLeds(){
 
 }
 
+//This function changes the selected line to read mode, and put the other ones to high impedance to avoid interference
 void LedLine(int digitalLine){
   for(int i=0;i<digLed;i++){
     if(ledPins[i]==digitalLine){
@@ -154,6 +157,8 @@ void LedLine(int digitalLine){
   } 
 }
 
+//This function is used to mantain a reference of voltage for the led
+//It's used constantly to avoid unstabilities
 void calibrateLed(){
     pinMode(2,OUTPUT);
     digitalWrite(2,HIGH);
@@ -166,7 +171,7 @@ void calibrateLed(){
     pinMode(2,INPUT);
 }
 
-
+//Transform voltage into the value of the corresponding led
 int colorLed(int analogPin){
   double V=1023-analogRead(analogPin);
   V=(V-redV)/(1.0*(whiteV-redV));
