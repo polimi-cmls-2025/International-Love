@@ -149,22 +149,4 @@ MIDIFunc.noteOff({ |velocity, noteNum, channel, srcID|
 )
 
 
-// Used only without midi, to initiate it:
-(
-Synth(\multiOsc, [
-    \freq, 440, //Fixed freq to test
-    \vol1, ~volumes[0],
-    \vol2, ~volumes[1],
-    \vol3, ~volumes[2],
-    \vol4, ~volumes[3],
-    \atk, ~adsr[0] / 900 * 2,
-    \dec, ~adsr[1] / 900 * 2,
-    \sus, ~adsr[2] / 900,
-    \rel, ~adsr[3] / 900 * 2,
-    \fmRate, (~fx[0] / 900).linexp(0.01, 1, 0.3, 10),
-    \lfoFreq, (~fx[1] / 900).linexp(0.01, 1, 1, 12),
-    \master, ~masterVol,
-    \pan, ~pan
 
-]);
-)
