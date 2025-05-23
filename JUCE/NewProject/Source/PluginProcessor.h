@@ -2,7 +2,7 @@
 
 #include <JuceHeader.h>
 
-class FilterPluginAudioProcessor : 
+class FilterPluginAudioProcessor :
     public juce::AudioProcessor,
     public juce::OSCReceiver,
     private juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback>
@@ -42,9 +42,13 @@ private:
 
     enum FilterType { LPF, HPF, BPF, NOTCH, NUM_TYPES };
     std::array<bool, NUM_TYPES> activeFilters { false, false, false, false };
+    // Filter state initialization
     std::array<float, NUM_TYPES> cutoffHz { 1000.0f, 1000.0f, 1000.0f, 1000.0f };
+    // Filter freqs initialization
 
-    std::array<juce::dsp::StateVariableTPTFilter<float>, NUM_TYPES> filters;
+    // Separate filters for the 2 channels to avoid artifacts
+    static constexpr int NUM_CHANNELS = 2;
+    std::array<std::array<juce::dsp::StateVariableTPTFilter<float>, NUM_TYPES>, NUM_CHANNELS> filters;
     juce::dsp::ProcessSpec spec;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterPluginAudioProcessor)

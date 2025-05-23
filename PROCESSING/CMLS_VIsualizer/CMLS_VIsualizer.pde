@@ -13,7 +13,7 @@ boolean hasSignal = false;
 boolean newWaveReceived = false;  
 int displayMode = 0; // 0=waveform, 1=oscilloscope
 PFont font, smallFont;
-color bgColor = color(255);  
+color bgColor = color(180, 50, 90);  
 color gridColor = color(200); 
 int lastReset = 0;
 boolean waitingForTrigger = false;
@@ -24,12 +24,13 @@ int triggerTimeout = 100;       // Milliseconds to wait before forcing an update
 boolean triggerFound = false;
 
 void setup() {
-  size(800, 600, P2D);
+  size(1000, 600);
+  smooth(4);
   
   // OSC configuration
   try {
-    oscP5 = new OscP5(this, 9004);
-    myRemoteLocation = new NetAddress("127.0.0.1", 9004);
+    oscP5 = new OscP5(this, 9001);
+    myRemoteLocation = new NetAddress("127.0.0.1", 9001);
   } catch (Exception e) {
     println("OSC init error: " + e);
   }
@@ -41,7 +42,19 @@ void setup() {
 }
 
 void draw() {
+  
+ PImage background_img = loadImage("background.png");
+
+if (background_img != null) { //fallback to ensure that the background is loaded even without the image
+  background_img.resize(width, height);
+  background(background_img);
+} else {
   background(bgColor);
+}
+  
+
+  fill(0, 0, 0, 230);
+  rect(20, 80, 960, 510, 15);
   drawUI();
   
   if (newWaveReceived) {
@@ -136,28 +149,32 @@ void oscEvent(OscMessage msg) {
 
 void drawUI() {
   // Header
-  fill(240);
-  noStroke();
-  rect(width/2 - 200, 10, 400, 60, 10);
-  fill(30);
-  textFont(font);
-  textAlign(CENTER, TOP);
-  text("CMLS VISUALIZER", width/2, 20);
+    fill(0, 0, 0, 100);
+    noStroke(); 
+    rect(width/2 - 250, 10, 500, 60, 10);
   
+    fill(230, 40, 40);
+    textFont(font);
+    textAlign(CENTER, TOP);
+    textSize(42); 
+    text("T.I.L.E.S Wave visualizer", width/2, 20);
+
   // Mode information
-  textFont(smallFont);
-  fill(hasSignal ? color(0, 150, 0) : color(200, 0, 0));
-  String modeText = displayMode == 0 ? "WAVEFORM" : "OSCILLOSCOPE";
-  text("MODE: " + modeText, width/2, 100);
-  
+    textFont(smallFont);
+    textSize(20); 
+    fill(hasSignal ? color(0, 150, 0) : color(200, 0, 0));
+    String modeText = displayMode == 0 ? "WAVEFORM" : "OSCILLOSCOPE";
+    text("MODE: " + modeText, width/2, 100);
+
   // Instructions
-  fill(100);
-  String instructions = "1: Waveform | 2: Oscilloscope | SPACE: Capture now | R: Reset";
-  if (displayMode == 1) {
-    instructions += " | U/D: Adjust trigger (" + nf(triggerThreshold, 1, 2) + ")";
-  }
-  text(instructions, width/2, height - 30);
-  
+    fill(230, 40, 40);
+    textSize(18); 
+    String instructions = "1: Waveform | 2: Oscilloscope | SPACE: Capture now | R: Reset";
+    if (displayMode == 1) {
+      instructions += " | U/D: Adjust trigger (" + nf(triggerThreshold, 1, 2) + ")";
+    }
+    text(instructions, width/2, height - 30);
+      
   // Show trigger level if in oscilloscope mode
   if (displayMode == 1) {
     fill(255, 0, 0);
@@ -210,7 +227,7 @@ void drawOscilloscope() {
   
   // Captured waveform
   stroke(0, 120, 255);
-  strokeWeight(2);
+  strokeWeight(3);
   noFill();
   beginShape();
   
