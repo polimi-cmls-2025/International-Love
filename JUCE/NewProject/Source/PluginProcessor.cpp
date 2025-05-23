@@ -1,40 +1,52 @@
 #include "PluginProcessor.h"
-#include <algorithm> // per std::count
+#include <algorithm>
 
 FilterPluginAudioProcessor::FilterPluginAudioProcessor()
 {
     this->OSCReceiver::connect(9001);
     this->OSCReceiver::addListener(this);
 
-    // Inizializza tutti i filtri come passa basso (per default)
-    for (auto& filter : filters)
-        filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+    // We initialize all filters as lowpass by default
+    for (int ch = 0; ch < NUM_CHANNELS; ++ch)
+    {
+        for (auto& filter : filters[ch])
+            filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+    }
 }
 
 FilterPluginAudioProcessor::~FilterPluginAudioProcessor()
 {
-this->OSCReceiver::removeListener(this);
-this->OSCReceiver::disconnect();
+    this->OSCReceiver::removeListener(this);
+    this->OSCReceiver::disconnect();
 }
 
 void FilterPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
-    spec.numChannels = getTotalNumOutputChannels();
-
-    for (auto& filter : filters)
-        filter.prepare(spec);
+    spec.numChannels = 1; // Each filter process 1 chanel at a time to avoid artifacts
+    
+    // Prepare all filters
+    for (int ch = 0; ch < NUM_CHANNELS; ++ch)
+    {
+        for (auto& filter : filters[ch])
+            filter.prepare(spec);
+    }
 }
 
 void FilterPluginAudioProcessor::releaseResources()
 {
-    // Non serve per ora
+    // Reset all filters
+    for (int ch = 0; ch < NUM_CHANNELS; ++ch)
+    {
+        for (auto& filter : filters[ch])
+            filter.reset();
+    }
 }
 
 bool FilterPluginAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
-    // Supporta solo audio stereo in/out
+    // Only stereo audio
     return layouts.getMainInputChannelSet() == juce::AudioChannelSet::stereo()
         && layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
 }
@@ -42,40 +54,50 @@ bool FilterPluginAudioProcessor::isBusesLayoutSupported(const BusesLayout& layou
 void FilterPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
 {
     juce::ScopedNoDenormals noDenormals;
-    juce::dsp::AudioBlock<float> block(buffer);
-
-    // Reset buffer temporaneo per elaborare ogni filtro separatamente
-    juce::AudioBuffer<float> tempBuffer;
-    tempBuffer.makeCopyOf(buffer);
+    
+    const int numChannels = buffer.getNumChannels();
+    const int numSamples = buffer.getNumSamples();
 
     int activeCount = std::count(activeFilters.begin(), activeFilters.end(), true);
     if (activeCount == 0)
-        return; // nessun filtro attivo, esco
+        return; // No filter active
 
-    // Elaborazione filtri, massimo 2 attivi contemporaneamente
-    for (int i = 0; i < NUM_TYPES; ++i)
+    // Chanel wise filter elaboration
+    for (int ch = 0; ch < numChannels && ch < NUM_CHANNELS; ++ch)
     {
-        if (activeFilters[i])
+        // Create an audio block for the current channel
+        auto* channelData = buffer.getWritePointer(ch);
+        juce::dsp::AudioBlock<float> channelBlock(&channelData, 1, numSamples);
+        
+        // Apply every active filter to the current channel
+        for (int i = 0; i < NUM_TYPES; ++i)
         {
-            if (i == NOTCH)
+            if (activeFilters[i])
             {
-                // Fake notch: cascata HPF e LPF
-                filters[HPF].setCutoffFrequency(cutoffHz[i]+1000);
-                filters[HPF].setType(juce::dsp::StateVariableTPTFilterType::highpass);
-                filters[HPF].prepare(spec);
-                filters[HPF].process(juce::dsp::ProcessContextReplacing<float>(block));
+                if (i == NOTCH)
+                {
+                    float centerFreq = cutoffHz[i]; // This will be the center frequency of our notch
+                    float lowCutoff = centerFreq - (bandwidth * 0.5f); // high and low frequencies calculated as a percentage of the cufott, this ensures that the notch lenght varies with the cutoff to be more perceptually accurate
+                    float highCutoff = centerFreq + (bandwidth * 0.5f);
+                    
+                    // We make sure the frequencies are valid
+                    lowCutoff = std::max(20.0f, lowCutoff);
+                    highCutoff = std::min(20000.0f, highCutoff);
+                    
+                    filters[ch][LPF].setCutoffFrequency(lowCutoff);
+                    filters[ch][LPF].setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+                    filters[ch][LPF].process(juce::dsp::ProcessContextReplacing<float>(channelBlock));
 
-                filters[LPF].setCutoffFrequency(cutoffHz[i]);
-                filters[LPF].setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-                filters[LPF].prepare(spec);
-                filters[LPF].process(juce::dsp::ProcessContextReplacing<float>(block));
-            }
-            else
-            {
-                filters[i].setCutoffFrequency(cutoffHz[i]);
-                filters[i].setType(static_cast<juce::dsp::StateVariableTPTFilterType>(i));
-                filters[i].prepare(spec);
-                filters[i].process(juce::dsp::ProcessContextReplacing<float>(block));
+                    filters[ch][HPF].setCutoffFrequency(highCutoff);
+                    filters[ch][HPF].setType(juce::dsp::StateVariableTPTFilterType::highpass);
+                    filters[ch][HPF].process(juce::dsp::ProcessContextReplacing<float>(channelBlock));
+                }
+                else
+                {
+                    filters[ch][i].setCutoffFrequency(cutoffHz[i]);
+                    filters[ch][i].setType(static_cast<juce::dsp::StateVariableTPTFilterType>(i));
+                    filters[ch][i].process(juce::dsp::ProcessContextReplacing<float>(channelBlock));
+                }
             }
         }
     }
@@ -100,7 +122,7 @@ void FilterPluginAudioProcessor::oscMessageReceived(const juce::OSCMessage& mess
             {
                 activeFilters[idx] = (active != 0);
 
-                // Controlla massimo 2 attivi
+                // Max 2 filter actives
                 int count = 0;
                 for (bool a : activeFilters)
                     if (a) ++count;
@@ -128,7 +150,7 @@ void FilterPluginAudioProcessor::oscMessageReceived(const juce::OSCMessage& mess
     }
 }
 
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() // I don't actually know what the function does but the compiler refuses to work without it
 {
     return new FilterPluginAudioProcessor();
 }
