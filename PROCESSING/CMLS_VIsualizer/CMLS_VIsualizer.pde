@@ -13,7 +13,7 @@ boolean hasSignal = false;
 boolean newWaveReceived = false;  
 int displayMode = 0; // 0=waveform, 1=oscilloscope
 PFont font, smallFont;
-color bgColor = color(255);  
+color bgColor = color(180, 50, 90);  
 color gridColor = color(200); 
 int lastReset = 0;
 boolean waitingForTrigger = false;
@@ -42,14 +42,19 @@ void setup() {
 }
 
 void draw() {
-  //background(bgColor);
-  PImage background_img;
-  background_img = loadImage("background.png");
+  
+ PImage background_img = loadImage("background.png");
+
+if (background_img != null) { //fallback to ensure that the background is loaded even without the image
   background_img.resize(width, height);
   background(background_img);
+} else {
+  background(bgColor);
+}
+  
 
   fill(0, 0, 0, 230);
-  rect(20, 80, 960, 510);
+  rect(20, 80, 960, 510, 15);
   drawUI();
   
   if (newWaveReceived) {
