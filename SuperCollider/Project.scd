@@ -1,13 +1,14 @@
 SerialPort.devices;
 // Read the port you need to write in SerialPort.new
+
 (
 s.reboot;
-
+s.options.device="CABLE Input (VB~Audio Virtual Cable)";
 MIDIClient.sources.do({ |src, i| [i, src].postln });
 MIDIClient.init;
 MIDIIn.connectAll;
 MIDIFunc.trace(true);
-~port = SerialPort.new("/dev/tty.usbmodem14101", 9600);
+~port = SerialPort.new("COM3", 9600);
 ~voices = Array.newClear(128); // For 128 MIDI notes
 )
 
@@ -56,8 +57,9 @@ MIDIFunc.trace(true);
 ~reading = false;
 
 ~getValues = Routine({
-    var c;
-    loop {
+    var c, parts, filterNames;
+
+    filterNames = ["LPF", "HPF", "BPF", "NOTCH"];    loop {
         c = ~port.read.asAscii;
         if(c.notNil) {
             if(c == $<) {
@@ -82,7 +84,6 @@ MIDIFunc.trace(true);
                          "PAN:", ~pan].postln;*/
 
 						 // FILTER OSC MESSAGE
-                        var filterNames = ["LPF", "HPF", "BPF", "NOTCH"];
 
                         4.do{|i|
                             var val = ~filters[i];
@@ -224,7 +225,7 @@ SynthDef(\multiOsc, { |freq = 220,
 
     mix = mix * lfo;
 
-    mix = mix * env * (master / 900)/3;
+    mix = mix * env * (master / 900)/15;
 
     Out.ar(0, Pan2.ar(mix, (pan / 900 * 2) - 1));
 }).add;
