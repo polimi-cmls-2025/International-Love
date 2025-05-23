@@ -77,8 +77,18 @@ void FilterPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
                 if (i == NOTCH)
                 {
                     float centerFreq = cutoffHz[i]; // This will be the center frequency of our notch
-                    float lowCutoff = centerFreq - (bandwidth * 0.5f); // high and low frequencies calculated as a percentage of the cufott, this ensures that the notch lenght varies with the cutoff to be more perceptually accurate
-                    float highCutoff = centerFreq + (bandwidth * 0.5f);
+                    // OPTION 1: This is a proportional approach, the filter is slimmer in the low end and wider in the high frequencies because it's 10% of the cutoff, the behaviour might be strance because it widens when the cutoff is increased
+                    // float bandwidth = centerFreq * 0.1f;
+                    // float lowCutoff = centerFreq - (bandwidth * 0.5f);
+                    // float highCutoff = centerFreq + (bandwidth * 0.5f);
+                    //bandwidth = juce::jlimit(1000.0f, 2000.0f, bandwidth); // Reasonable limits to avoid extremely wide or small filters
+                    
+                    // OPTION 2: We can instead use a reverse approach that might be perceptually better, we widen the filter when cutoff is low and tighten it when cutoff is high
+                    float bandwidth = 1000.0f * (1000.0f / centerFreq);
+                    bandwidth = juce::jlimit(1000.0f, 2000.0f, bandwidth); // Reasonable limits to avoid extremely wide or small filters
+                    
+                    float lowCutoff = centerFreq - (bandwidth);
+                    float highCutoff = centerFreq + (bandwidth);
                     
                     // We make sure the frequencies are valid
                     lowCutoff = std::max(20.0f, lowCutoff);
