@@ -48,7 +48,7 @@ void draw() {
   background_img.resize(width, height);
   background(background_img);
 
-  fill(0, 0, 0, 200);
+  fill(0, 0, 0, 230);
   rect(20, 80, 960, 510);
   drawUI();
   
