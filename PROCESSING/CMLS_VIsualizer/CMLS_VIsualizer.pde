@@ -222,7 +222,7 @@ void drawOscilloscope() {
   
   // Captured waveform
   stroke(0, 120, 255);
-  strokeWeight(2);
+  strokeWeight(3);
   noFill();
   beginShape();
   
