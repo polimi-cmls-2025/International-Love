@@ -3,7 +3,7 @@ SerialPort.devices;
 
 (
 s.reboot;
-s.options.device="CABLE Input (VB~Audio Virtual Cable)";
+s.options.device="CABLE Input (VB-Audio Virtual Cable)";
 MIDIClient.sources.do({ |src, i| [i, src].postln });
 MIDIClient.init;
 MIDIIn.connectAll;
@@ -157,7 +157,7 @@ MIDIFunc.noteOn({ |velocity, noteNum, channel, srcID|
             \vol2, if(~volumes.isNil, {0}, {~volumes[1]}),
             \vol3, if(~volumes.isNil, {0}, {~volumes[2]}),
             \vol4, if(~volumes.isNil, {0}, {~volumes[3]}),
-			\atk, if(~adsr.isNil, {0.01}, {(~adsr[0] / 900).linexp(0, 1, 0.01, 50)}),
+			\atk, if(~adsr.isNil, {0.01}, {(~adsr[0] / 900).linexp(0, 1, 0.01, 45)}),
             \dec, if(~adsr.isNil, {0.3}, {~adsr[1] / 900 * 2}),
             \sus, if(~adsr.isNil, {0.5}, {~adsr[2] / 900}),
             \rel, if(~adsr.isNil, {1.0}, {~adsr[3] / 900 * 2}),
@@ -225,7 +225,7 @@ SynthDef(\multiOsc, { |freq = 220,
 
     mix = mix * lfo;
 
-    mix = mix * env * (master / 900)/15;
+	mix = mix * env * (master / 900)/((vol1+vol2+vol3+vol4)/900)/17;
 
     Out.ar(0, Pan2.ar(mix, (pan / 900 * 2) - 1));
 }).add;
