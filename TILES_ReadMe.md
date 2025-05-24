@@ -242,7 +242,7 @@ The second script then establishes a series of helper functions to simplify send
 #### JUCE:
 
 The plugin host connection can be seen below:
-![Description of image](screenshot.png)
+![JUCE Plugin Host](pluginhost.jpeg)
 
 ##### Distortion:
 
