@@ -241,6 +241,9 @@ The second script then establishes a series of helper functions to simplify send
 
 #### JUCE:
 
+The plugin host connection can be seen below:
+![Description of image](screenshot.png)
+
 ##### Distortion:
 
 The JUCE-based audio plugin project implements a real-time distortion effect processor with external OSC control support. The plugin leverages the AudioProcessorValueTreeState to manage a single Drive parameter, which controls the intensity of the distortion effect. Internally, the incoming audio signal is first passed through a gain stage—scaled dynamically based on the drive parameter—and then processed with a two-stage tanh non-linearity to simulate hard clipping, followed by output gain compensation. The plugin also includes an integrated OSC receiver that listens on port 9003 for /drive messages, enabling real-time parameter changes from external controllers or visualization interfaces. While the audio processing is handled in PluginProcessor.cpp, the basic GUI is handled by PluginEditor.cpp, currently set up as a minimal placeholder. The project is structured using JUCE’s modular framework and exported for VST3 format, with all relevant JUCE modules configured via Projucer. This design supports extendibility for future GUI development or integration with additional effects.
