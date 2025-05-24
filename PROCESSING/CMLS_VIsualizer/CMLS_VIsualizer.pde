@@ -18,7 +18,7 @@ color gridColor = color(200);
 int lastReset = 0;
 boolean waitingForTrigger = false;
 int triggerPosition = -1;
-float triggerThreshold = 0.1f;  // Adjust as needed
+float triggerThreshold = 0.05f;  // Adjust as needed
 float lastTriggerTime = 0;
 int triggerTimeout = 100;       // Milliseconds to wait before forcing an update
 boolean triggerFound = false;
@@ -29,8 +29,8 @@ void setup() {
   
   // OSC configuration
   try {
-    oscP5 = new OscP5(this, 9001);
-    myRemoteLocation = new NetAddress("127.0.0.1", 9001);
+    oscP5 = new OscP5(this, 9004);
+    myRemoteLocation = new NetAddress("127.0.0.1", 9004);
   } catch (Exception e) {
     println("OSC init error: " + e);
   }
