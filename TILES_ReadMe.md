@@ -316,10 +316,7 @@ Both modes receive audio sample data via OSC (Open Sound Control) and store them
 
 #### 6. Test Audio Signal Chain
 * Play a sound or trigger a synth in SuperCollider.
-* Verify that:
-The audio enters the plugin host.
-The audio flows correctly through the plugin chain.
-The processed audio is audible on your output device.
+* Verify that the audio enters the plugin host and the audio flows correctly through the plugin chain. The processed audio should be audible on your output device.
 
 ### Scope for Future Work: 
 * Multi-sensory Feedback for Broader Accesibility: By incorporating haptic motors, LEDs, or thermal feedback, we can make the experience richer for users with different sensory profiles (eg. deaf-blind users).
