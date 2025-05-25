@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Logo.jpg" width="200" alt="Logo" />
+  <img src="MEDIA/Logo.jpg" width="200" alt="Logo" />
 </p>
 
 <h1 align="center">T.I.L.E.S</h1>
@@ -13,6 +13,10 @@ Employing Supercollider as a sound source, we design an interface that enables a
 
 ### Motivation
 The objective of this project is to provide individuals with disabilities with an immersive experience of sound processing through an analogue interface. Utilising pins, we create braille indents on our ‘tiles’, enabling the user to freely explore and manipulate the interface.
+
+<p align="center">
+  <img src="MEDIA/Board.jpg" width="800" alt="Board" />
+</p>
 
 ### Schematic Diagram
 ```mermaid
@@ -33,6 +37,7 @@ graph LR
 ### Table of Contents:
 * Requirements
 * Software Components
+* Demonstration
 * Scope for Future Work
 * Acknowledgement
 * Contributors
@@ -242,7 +247,9 @@ The second script then establishes a series of helper functions to simplify send
 #### JUCE:
 
 The plugin host connection can be seen below:
-![JUCE Plugin Host](plugin_host.jpeg)
+<p align="center">
+  <img src="MEDIA/Plugins.jpg" width="1000" alt="Plugins" />
+</p>
 
 ##### Distortion:
 
@@ -289,6 +296,11 @@ This mode emulates the behavior of a traditional oscilloscope. It captures and d
 
 Both modes receive audio sample data via OSC (Open Sound Control) and store them in circular buffers tailored for each visualization mode. The waveforms are rendered on-screen along with a grid overlay to support accurate visual interpretation.
 
+<p align="center">
+  <img src="MEDIA/Osciloscope.jpg" width="600" alt="Osciloscope" />
+</p>
+
+
 ### Project Implementation:
 #### 1. Connect the Arduino Board
 * Plug the Arduino board into your computer via a USB cable.
@@ -318,6 +330,12 @@ Both modes receive audio sample data via OSC (Open Sound Control) and store them
 * Play a sound or trigger a synth in SuperCollider.
 * Verify that the audio enters the plugin host and the audio flows correctly through the plugin chain. The processed audio should be audible on your output device.
 
+### Demonstration:
+
+<p align="center">
+  <img src="MEDIA/Demonstration.mp4" width="800" alt="Demonstration" />
+</p>
+
 ### Scope for Future Work: 
 * Multi-sensory Feedback for Broader Accesibility: By incorporating haptic motors, LEDs, or thermal feedback, we can make the experience richer for users with different sensory profiles (eg. deaf-blind users).
 
@@ -329,8 +347,9 @@ We extend our sincere gratitude to Professor Fabio Antonacci, Professor Antonio 
 ### Contributions:
 This system is the outcome of the project work undertaken for the “Computer Music - Languages and Systems” examination for the academic year 2024/2025 at Politecnico di Milano developed by the “International Love” team. The team members consist of: 
 
-* Jorge Cuartero Galindo 🇪🇸
+* Jorge Cuartero 🇪🇸
 * Sebastian Gomez 🇲🇽
 * Nicola Nespoli 🇮🇹
 * Matteo Vitalone 🇫🇷
 * Benedito Ferrao 🇮🇳
+
