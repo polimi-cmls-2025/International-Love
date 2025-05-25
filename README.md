@@ -272,7 +272,7 @@ The second script then establishes a series of helper functions to simplify send
 
 The plugin host connection can be seen below:
 <p align="center">
-  <img src="MEDIA/Plugins.jpg" width="1000" alt="Plugins" />
+  <img src="MEDIA/Plugin.jpg" width="1000" alt="Plugins" />
 </p>
 
 ##### Distortion:
