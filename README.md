@@ -36,6 +36,7 @@ graph LR
 
 ### Table of Contents:
 * Requirements
+* Electronics
 * Software Components
 * Demonstration
 * Scope for Future Work
@@ -49,10 +50,14 @@ graph LR
 * LEDs (Different Voltages)
 * Diodes (1N4007)
 * Cables
-* Rotatory Potentiometers (10kΩ)
+* Rotatory Potentiometers (50kΩ)
 * Slider Potentiometers (10kΩ)
-* Jack Connectors
+* Neodimium magnets
 * Styrofoam for the “TILES”
+* MIDI keyboard
+* Arduino UNO
+* Glue gun
+* Pins with round head
 
 #### Software:
 * Supercollider: (https://supercollider.github.io/)
@@ -60,22 +65,43 @@ graph LR
 * Projucer (For plugin setup and export)
 * Arduino IDE: (https://www.arduino.cc/)
 * Virtual Audio Cable Software (eg. BlackHole for macOS, VB-Audio Virtual Cable for Windows)
+* 
+### Electronics:
+This part const of two differentiated modules, tiles detection and potentiometer measuring. As the amount of voltage values to read it's higher than the amount of analog inputs, we require to use a matrix architecture, dividing the potentiometers and leds in groups (or colums) that can be activated at the moment of reading. This is perfomed by Arduino.
+
+For the tiles detection, we meassure the voltage drop of leds of different colour. As this values can be very close sometimes, the led values are constantly being calibrated to avoid undesired alterations. Concerning the conection of the leds, it is done with magnets properly polarize to only attach in the right position of the led.
+
+For the potentiometers, the are in divisor configuration to ensure lineal input. Also, diodes are required due to the matrix configuration previously mentioned. This restricts a bit the range of operation.
 
 ### Software Components:
 
 
 #### Arduino:
-This Arduino code transforms our physical circuit into a custom control surface for the SuperCollider synthesizer. The script interprets which colored LED is active in the circuit to determine which audio effect is connected. The measureLeds() function reads voltage values associated with different colored LEDs. Since each color (blue, green, red and white) has a unique voltage signature when active, the colorLed() function translates these voltage readings into numerical IDs. This allows the Arduino to know, for example, if the "blue LED effect" is currently selected.
+
+The purspose of arduino is to read and codify the values obtained from the board. To do this, it first have to coordinate the activation of the different groups to be readed. This architecture implies that not every value can be readed in realtime, but the refresh rate for the complete system is below 0.1 seconds, so it is not perceivable by the user.
+
+By reading the leds, Arduino can detect which led it is connected, and assign to it the corresponding waveform, effect, or filter. At the same time, arduino is constantly reading the values of the potentiometers. 
+
+Then, arduino correlates the connected tiles with the values in the pots, and via serial port, send the values for each waveform, effect, and filter to the computer, where is received by SuperCollider. 
 
 <div style="width: 100%; display: flex; justify-content: center;">
 <table border="1" cellspacing="0" cellpadding="8" style="border-collapse: collapse; text-align: center;">
 <tr style="background-color: #cccccc; color: black;">
-    <th>Parameter</th>
-    <th>Sine Wave (Red)</th>
-    <th>Square Wave (Green)</th>
-    <th>Triangle (Blue)</th>
-    <th>Saw (White)</th>
+    <th>Led</th>
+    <th>Red</th>
+    <th>Green</th>
+    <th>Blue</th>
+    <th>White</th>
   </tr>
+  
+  <tr>
+    <td>Waveform</td>
+    <td>Sine Wave</td>
+    <td>Square Wave </td>
+    <td>Triangle </td>
+    <td>Saw </td>
+  </tr>
+    
   <tr>
     <td>FX</td>
     <td>Frequency Modulator (FM)</td>
@@ -92,8 +118,6 @@ This Arduino code transforms our physical circuit into a custom control surface 
   </tr>
 </table>
 </div>
-
-Simultaneously, the measurePot() function continuously reads the values of various potentiometers. In the main loop(), the Arduino then maps these potentiometer readings to specific control parameters for SuperCollider based on which LED is active. For instance, if the active LED indicates the "wave" module is selected, a specific potentiometer's value will be assigned to control a synthesizer waveform's volume. Similarly, other potentiometers are routed to control "FX" or "FILT" parameters depending on their associated active LED. All this sensor data is then packaged into a single, comma-separated string, enclosed by < and > characters, and sent continuously over the serial port. This data stream allows SuperCollider to receive real-time updates from our physical interface.
 
 #### Supercollider:
 SuperCollider works as our software synthesizer controlled externally, integrating MIDI input for note playback with dynamic parameter control via a serial port. Upon execution, the code first prepares the SuperCollider server and initializes the MIDI system, enabling the program to receive and interpret musical performance data from an external (but can also be virtual) MIDI keyboard. This allows for standard note-on and note-off events to trigger and sustain/release sounds.
