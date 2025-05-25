@@ -50,9 +50,9 @@ graph LR
 * LEDs (Different Voltages)
 * Diodes (1N4007)
 * Cables
-* Rotatory Potentiometers (50kΩ)
+* Rotary Potentiometers (50kΩ)
 * Slider Potentiometers (10kΩ)
-* Neodimium magnets
+* Neodymium magnets
 * Styrofoam for the “TILES”
 * MIDI keyboard
 * Arduino UNO
@@ -69,18 +69,18 @@ graph LR
 ### Electronics:
 This part consists of two differentiated modules, tiles detection and potentiometer measuring. As the number of voltage values to read is higher than the number of analog inputs, we require to use a matrix architecture, dividing the potentiometers and leds in groups (or colums) that can be activated at the moment of reading. This is perfomed by Arduino.
 
-For the tiles detection, we meassure the voltage drop of leds of different colour. As this values can be very close sometimes, the led values are constantly being calibrated to avoid undesired alterations. Concerning the conection of the leds, it is done with magnets properly polarize to only attach in the right position of the led.
+For the tiles detection, we measure the voltage drop of LEDs of different colors. As this values can sometimes be very close, the LED values are constantly being calibrated to avoid undesired alterations. Concerning the conection of the LEDs, it is done with magnets properly polarize to only attach in the right position of the LED.
 
-For the potentiometers, the are in divisor configuration to ensure lineal input. Also, diodes are required due to the matrix configuration previously mentioned. This restricts a bit the range of operation.
+For the potentiometers, the are in voltaje divider configuration to ensure linear input. Also, diodes are required due to the matrix configuration previously mentioned. This slightly restricts the range of operation.
 
 ### Software Components:
 
 
 #### Arduino:
 
-The purspose of arduino is to read and codify the values obtained from the board. To do this, it first have to coordinate the activation of the different groups to be readed. This architecture implies that not every value can be readed in realtime, but the refresh rate for the complete system is below 0.1 seconds, so it is not perceivable by the user.
+The purspose of arduino is to read and encode the values obtained from the board. To do this, it first have to coordinate the activation of the different groups to be read. This architecture implies that not every value can be readed in realtime, but the refresh rate for the complete system is below 0.1 seconds, so it is not perceivable by the user.
 
-By reading the leds, Arduino can detect which led it is connected, and assign to it the corresponding waveform, effect, or filter. At the same time, arduino is constantly reading the values of the potentiometers. 
+By reading the LEDs, Arduino can detect which led it is connected, and assign to it the corresponding waveform, effect, or filter. At the same time, arduino is constantly reading the values of the potentiometers. 
 
 Then, arduino correlates the connected tiles with the values in the pots, and via serial port, send the values for each waveform, effect, and filter to the computer in the propper format, where is received by SuperCollider. 
 
@@ -280,7 +280,7 @@ The plugin host connection can be seen below:
 
 The JUCE-based audio plugin project implements a real-time distortion effect processor with external OSC control support. The plugin uses the AudioProcessorValueTreeState to manage a single Drive parameter, that controls the intensity of the distortion effect. Internally, the incoming audio signal is first passed through a gain stage that is changed dynamically based on the drive parameter, and then it is processed with to emulate hard clipping, ending with an output gain compensation. 
 
-In order to do this the plugin has an OSC receiver that listens on port 9003 for /drive messages that are sended by Supercolider with the data received from Arduino, enabling real-time parameter changes from external controllers or visualization interfaces. 
+In order to do this the plugin has an OSC receiver that listens on port 9003 for /drive messages that are sent by SuperCollider with the data received from Arduino, enabling real-time parameter changes from external controllers or visualization interfaces. 
 
 ##### Filters:
 
@@ -366,7 +366,7 @@ Both modes receive audio sample data via OSC (Open Sound Control) and store them
 </p>
 
 ### Scope for Future Work: 
-* Multi-sensory Feedback for Broader Accesibility: By incorporating haptic motors, LEDs, or thermal feedback, we can make the experience richer for users with different sensory profiles.
+* Multi-sensory Feedback for Broader Accessibility: By incorporating haptic motors, LEDs, or thermal feedback, we can make the experience richer for users with different sensory profiles.
 
 * Therapeutic Sound Interaction: We can collaborate with therapists to develop sound-based therapies for individuals with cognitive or sensory impairments. Music heals :D
 
