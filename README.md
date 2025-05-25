@@ -9,10 +9,10 @@
 </p>
 
 ### Description
-Employing Supercollider as a sound source, we design an interface that enables analogue audio processing using Arduino as the communication protocol. We manipulate the audio through JUCE plugins for effects and utilise processing as the graphical user interface for visualisation.
+The systems consist on a physical interface monitored by arduino that allows the user to create sound in Supercollider and apply different modifications through JUCE based plugins. All this supported by a visualizer working on processing.
 
 ### Motivation
-The objective of this project is to provide individuals with disabilities with an immersive experience of sound processing through an analogue interface. Utilising pins, we create braille indents on our ‘tiles’, enabling the user to freely explore and manipulate the interface.
+The objective of this project is to provide unexperienced users an easy aproach to sound synthesis via an easy to use physical interface. Additionally, the physical interface is supported with braille and diferent relieves, enabling users with visual dificulties to freely explore and manipulate the interface.
 
 ### Schematic Diagram
 ```mermaid
@@ -32,6 +32,7 @@ graph LR
 
 ### Table of Contents:
 * Requirements
+* Electronics
 * Software Components
 * Scope for Future Work
 * Acknowledgement
@@ -44,10 +45,14 @@ graph LR
 * LEDs (Different Voltages)
 * Diodes (1N4007)
 * Cables
-* Rotatory Potentiometers (10kΩ)
+* Rotatory Potentiometers (50kΩ)
 * Slider Potentiometers (10kΩ)
-* Jack Connectors
-* Lego Pieces/Styrofoam for the “TILES”
+* Neodimium magnets
+* Styrofoam for the “TILES”
+* MIDI keyboard
+* Arduino UNO
+* Glue gun
+* Pins with round head
 
 #### Software:
 * Supercollider: (https://supercollider.github.io/)
@@ -56,7 +61,27 @@ graph LR
 * Arduino IDE: (https://www.arduino.cc/)
 * Virtual Audio Cable Software (eg. BlackHole for macOS, VB-Audio Virtual Cable for Windows)
 
+### Electronics:
+This part const of two differentiated modules, tiles detection and potentiometer measuring. As the amount of voltage values to read it's higher than the amount of analog inputs, we require to use a matrix architecture, dividing the potentiometers and leds in groups (or colums) that can be activated at the moment of reading. This is perfomed by Arduino.
+
+For the tiles detection, we meassure the voltage drop of leds of different colour. As this values can be very close sometimes, the led values are constantly being calibrated to avoid undesired alterations. Concerning the conection of the leds, it is done with magnets properly polarize to only attach in the right position of the led.
+
+For the potentiometers, the are in divisor configuration to ensure lineal input. Also, diodes are required due to the matrix configuration previously mentioned. This restricts a bit the range of operation.
+
 ### Software Components:
+
+#### Arduino:
+
+The purspose of arduino is to read and codify the values obtained from the board. To do this, it first have to coordinate the activation of the different groups to be readed. This architecture implies that not every value can be readed in realtime, but the refresh rate for the complete system is below 0.1 seconds, so it is not perceivable by the user.
+
+By reading the leds, Arduino can detect which led it is connected
+
+This Arduino code transforms our physical circuit into a custom control surface for the SuperCollider synthesizer. The script interprets which colored LED is active in the circuit to determine which audio effect is connected. The measureLeds() function reads voltage values associated with different colored LEDs. Since each color (blue, green, red and white) has a unique voltage signature when active, the colorLed() function translates these voltage readings into numerical IDs. This allows the Arduino to know, for example, if the "blue LED effect" is currently selected.
+
+ MISSING UNTIL THE TEST
+
+Simultaneously, the measurePot() function continuously reads the values of various potentiometers. In the main loop(), the Arduino then maps these potentiometer readings to specific control parameters for SuperCollider based on which LED is active. For instance, if the active LED indicates the "wave" module is selected, a specific potentiometer's value will be assigned to control a synthesizer waveform's volume. Similarly, other potentiometers are routed to control "FX" or "FILT" parameters depending on their associated active LED. All this sensor data is then packaged into a single, comma-separated string, enclosed by < and > characters, and sent continuously over the serial port. This data stream allows SuperCollider to receive real-time updates from our physical interface.
+
 #### Supercollider:
 SuperCollider works as our software synthesizer controlled externally, integrating MIDI input for note playback with dynamic parameter control via a serial port. Upon execution, the code first prepares the SuperCollider server and initializes the MIDI system, enabling the program to receive and interpret musical performance data from an external (but can also be virtual) MIDI keyboard. This allows for standard note-on and note-off events to trigger and sustain/release sounds.
 
@@ -96,13 +121,6 @@ The sonic core of our system is the SynthDef \multiOsc, which defines the archit
 
 The second script then establishes a series of helper functions to simplify sending OSC messages to JUCE. For the filter plugin, ~setFilter sends a /filter/active message to port 9001, along with the filter's name (e.g., "LPF" for Low Pass Filter) and an active state (1 for on, 0 for off). ~setCutoff sends a /filter/cutoff message, specifying the filter name and its desired frequency. Similarly, for the reverb plugin, ~setWet sends a /wet message to port 9002, controlling the wet/dry mix of the reverberation with a normalized value between 0.0 and 1.0. The distortion plugin is controlled by ~setDrive, which sends a /drive message to port 9003, also with a normalized value to adjust the amount of distortion. By encapsulating these commands in reusable functions, the code becomes cleaner and easier to manage. At the end the wetness of the reverb or the drive of the distortion is set, effectively turning SuperCollider into a real-time controller for JUCE-based effects. 
 
-
-#### Arduino:
-This Arduino code transforms our physical circuit into a custom control surface for the SuperCollider synthesizer. The script interprets which colored LED is active in the circuit to determine which audio effect is connected. The measureLeds() function reads voltage values associated with different colored LEDs. Since each color (blue, green, red and white) has a unique voltage signature when active, the colorLed() function translates these voltage readings into numerical IDs. This allows the Arduino to know, for example, if the "blue LED effect" is currently selected.
-
- MISSING UNTIL THE TEST
-
-Simultaneously, the measurePot() function continuously reads the values of various potentiometers. In the main loop(), the Arduino then maps these potentiometer readings to specific control parameters for SuperCollider based on which LED is active. For instance, if the active LED indicates the "wave" module is selected, a specific potentiometer's value will be assigned to control a synthesizer waveform's volume. Similarly, other potentiometers are routed to control "FX" or "FILT" parameters depending on their associated active LED. All this sensor data is then packaged into a single, comma-separated string, enclosed by < and > characters, and sent continuously over the serial port. This data stream allows SuperCollider to receive real-time updates from our physical interface.
 
 #### JUCE:
 
