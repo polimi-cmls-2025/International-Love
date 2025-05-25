@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Tiles_logo.jpeg" width="200" alt="Logo" />
+  <img src="Logo.jpg" width="200" alt="Logo" />
 </p>
 
 <h1 align="center">T.I.L.E.S</h1>
