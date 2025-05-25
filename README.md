@@ -74,13 +74,9 @@ For the potentiometers, the are in divisor configuration to ensure lineal input.
 
 The purspose of arduino is to read and codify the values obtained from the board. To do this, it first have to coordinate the activation of the different groups to be readed. This architecture implies that not every value can be readed in realtime, but the refresh rate for the complete system is below 0.1 seconds, so it is not perceivable by the user.
 
-By reading the leds, Arduino can detect which led it is connected
+By reading the leds, Arduino can detect which led it is connected, and assign to it the corresponding waveform, effect, or filter. At the same time, arduino is reading the values of the potentiometers. 
 
-This Arduino code transforms our physical circuit into a custom control surface for the SuperCollider synthesizer. The script interprets which colored LED is active in the circuit to determine which audio effect is connected. The measureLeds() function reads voltage values associated with different colored LEDs. Since each color (blue, green, red and white) has a unique voltage signature when active, the colorLed() function translates these voltage readings into numerical IDs. This allows the Arduino to know, for example, if the "blue LED effect" is currently selected.
-
- MISSING UNTIL THE TEST
-
-Simultaneously, the measurePot() function continuously reads the values of various potentiometers. In the main loop(), the Arduino then maps these potentiometer readings to specific control parameters for SuperCollider based on which LED is active. For instance, if the active LED indicates the "wave" module is selected, a specific potentiometer's value will be assigned to control a synthesizer waveform's volume. Similarly, other potentiometers are routed to control "FX" or "FILT" parameters depending on their associated active LED. All this sensor data is then packaged into a single, comma-separated string, enclosed by < and > characters, and sent continuously over the serial port. This data stream allows SuperCollider to receive real-time updates from our physical interface.
+Then, arduino correlates the connected tiles with the values in the pots, and via serial port, send the values for each waveform, effect, and filter to the computer, where is received by SuperCollider. 
 
 #### Supercollider:
 SuperCollider works as our software synthesizer controlled externally, integrating MIDI input for note playback with dynamic parameter control via a serial port. Upon execution, the code first prepares the SuperCollider server and initializes the MIDI system, enabling the program to receive and interpret musical performance data from an external (but can also be virtual) MIDI keyboard. This allows for standard note-on and note-off events to trigger and sustain/release sounds.
