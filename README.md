@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="MEDIA/Logo.jepg" width="200" alt="Logo" />
+  <img src="MEDIA/Logo.jpeg" width="200" alt="Logo" />
 </p>
 
 <h1 align="center">T.I.L.E.S</h1>
