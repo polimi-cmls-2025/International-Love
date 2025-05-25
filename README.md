@@ -9,10 +9,10 @@
 </p>
 
 ### Description
-Employing Supercollider as a sound source, we design an interface that enables analogue audio processing using Arduino as the communication protocol. We manipulate the audio through JUCE plugins for effects and utilise processing as the graphical user interface for visualisation.
+The systems consist on a physical interface monitored by arduino that allows the user to create sound in Supercollider and apply different modifications through JUCE based plugins. All this supported by a visualizer working on processing.
 
 ### Motivation
-The objective of this project is to provide individuals with disabilities with an immersive experience of sound processing through an analogue interface. Utilising pins, we create braille indents on our ‘tiles’, enabling the user to freely explore and manipulate the interface.
+The objective of this project is to provide unexperienced users an easy aproach to sound synthesis via an easy to use physical interface. Additionally, the physical interface is supported with braille and diferent relieves, enabling users with visual dificulties to freely explore and manipulate the interface.
 
 <p align="center">
   <img src="MEDIA/Board.jpg" width="800" alt="Board" />
@@ -67,7 +67,7 @@ graph LR
 * Virtual Audio Cable Software (eg. BlackHole for macOS, VB-Audio Virtual Cable for Windows)
   
 ### Electronics:
-This part const of two differentiated modules, tiles detection and potentiometer measuring. As the amount of voltage values to read it's higher than the amount of analog inputs, we require to use a matrix architecture, dividing the potentiometers and leds in groups (or colums) that can be activated at the moment of reading. This is perfomed by Arduino.
+This part consists of two differentiated modules, tiles detection and potentiometer measuring. As the number of voltage values to read is higher than the number of analog inputs, we require to use a matrix architecture, dividing the potentiometers and leds in groups (or colums) that can be activated at the moment of reading. This is perfomed by Arduino.
 
 For the tiles detection, we meassure the voltage drop of leds of different colour. As this values can be very close sometimes, the led values are constantly being calibrated to avoid undesired alterations. Concerning the conection of the leds, it is done with magnets properly polarize to only attach in the right position of the led.
 
@@ -349,16 +349,12 @@ Both modes receive audio sample data via OSC (Open Sound Control) and store them
 * In the graph area: Drag the desired plugins from the list onto the graph canvas and connect them in series (i.e., the output of one plugin feeds into the input of the next).
 * Ensure that the final output of the plugin chain is routed to the main output node.
 
-#### 4. Verify Plugin Parameters
-* Open each plugin’s GUI by double-clicking its node in the graph.
-* Confirm that any parameters (e.g., wet/dry mix sliders, cutoff frequency) are correctly exposed and initialized.
-
-#### 5. Open SuperCollider
+#### 4. Open SuperCollider
 * Launch SuperCollider and open your .scd code file.
 * Evaluate each code block line-by-line, ensuring no errors appear in the post window.
 * Confirm that the audio generated is being sent through the virtual cable (i.e., routed into the JUCE Audio Plugin Host).
 
-#### 6. Test Audio Signal Chain
+#### 5. Test Audio Signal Chain
 * Play a sound or trigger a synth in SuperCollider.
 * Verify that the audio enters the plugin host and the audio flows correctly through the plugin chain. The processed audio should be audible on your output device.
 
