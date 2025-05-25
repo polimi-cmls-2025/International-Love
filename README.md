@@ -9,10 +9,11 @@
 </p>
 
 ### Description
-Employing Supercollider as the sound source, we design an interface that controls it and enables audio processing using Arduino as the communication protocol between the user and the computer. We manipulate the audio through Supercollider as well as JUCE (with plugins for effects) and use processing as the graphical user interface for visualization.
+The systems consist on a physical interface monitored by arduino that allows the user to create sound in Supercollider and apply different modifications through JUCE based plugins. All this supported by a visualizer working on processing.
 
 ### Motivation
-The objective of this project is to provide individuals with disabilities with an immersive experience of sound synthesis through an analogue interface. With the help of pins, we create braille indents on our ‘tiles’, making it easier for the user to understand, explore and manipulate the interface.
+The objective of this project is to provide unexperienced users an easy aproach to sound synthesis via an easy to use physical interface. Additionally, the physical interface is supported with braille and diferent relieves, enabling users with visual dificulties to freely explore and manipulate the interface.
+
 
 <p align="center">
   <img src="MEDIA/Board.jpg" width="800" alt="Board" />
