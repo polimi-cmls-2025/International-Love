@@ -65,7 +65,7 @@ graph LR
 * Projucer (For plugin setup and export)
 * Arduino IDE: (https://www.arduino.cc/)
 * Virtual Audio Cable Software (eg. BlackHole for macOS, VB-Audio Virtual Cable for Windows)
-* 
+  
 ### Electronics:
 This part const of two differentiated modules, tiles detection and potentiometer measuring. As the amount of voltage values to read it's higher than the amount of analog inputs, we require to use a matrix architecture, dividing the potentiometers and leds in groups (or colums) that can be activated at the moment of reading. This is perfomed by Arduino.
 
