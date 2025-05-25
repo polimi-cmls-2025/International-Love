@@ -82,7 +82,7 @@ The purspose of arduino is to read and codify the values obtained from the board
 
 By reading the leds, Arduino can detect which led it is connected, and assign to it the corresponding waveform, effect, or filter. At the same time, arduino is constantly reading the values of the potentiometers. 
 
-Then, arduino correlates the connected tiles with the values in the pots, and via serial port, send the values for each waveform, effect, and filter to the computer, where is received by SuperCollider. 
+Then, arduino correlates the connected tiles with the values in the pots, and via serial port, send the values for each waveform, effect, and filter to the computer in the propper format, where is received by SuperCollider. 
 
 <div style="width: 100%; display: flex; justify-content: center;">
 <table border="1" cellspacing="0" cellpadding="8" style="border-collapse: collapse; text-align: center;">
